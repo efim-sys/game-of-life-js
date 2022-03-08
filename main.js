@@ -2,15 +2,16 @@ const canvas = document.querySelector("canvas");
 const playButton = document.getElementById("playButton");
 const ctx = canvas.getContext("2d");
 
-const COLS = 10;
-const ROWS = 10;
-
 const resolution = 40;
+
+const COLS = Math.floor(window.innerWidth / resolution);
+const ROWS = Math.floor(window.innerHeight / resolution) - 1;
+
+
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
 let grid = new Array(COLS).fill(null).map(() => new Array(ROWS).fill(0));
-let nextGrid = new Array(COLS).fill(null).map(() => new Array(ROWS).fill(0));
 
 render();
 
@@ -31,12 +32,8 @@ function render() {
 }
 
 
-
-
-function play() {
-  console.log("play");
-  console.log(grid);
-  nextGrid = Object.assign({}, grid);
+function play(grid) {
+  const nextGrid = grid.map(arr => [...arr]);
   //if(grid[3][3]) console.log("3 3 is true");
   for(let x = 0; x < COLS; x++) {
     for(let y = 0; y < ROWS; y++) {
@@ -66,17 +63,17 @@ function play() {
 
     }
   }
-  console.log(grid);
-  console.log(nextGrid);
-  grid = Object.assign({}, nextGrid);
-  render();
+  return nextGrid;
 }
 
-playButton.addEventListener("click", play);
+playButton.addEventListener("click", function(){
+  grid = play(grid);
+  render();
+});
 
 canvas.addEventListener("click", (e) => {
-  var gridX = Math.floor(e.clientX / resolution)-1;
-  var gridY = Math.floor(e.clientY / resolution);
+  var gridX = Math.floor(e.clientX / resolution);
+  var gridY = Math.floor(e.clientY / resolution)-1;
   grid[gridX][gridY] = + !grid[gridX][gridY];
   render();
 });
