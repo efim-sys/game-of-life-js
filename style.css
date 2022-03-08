@@ -1,0 +1,46 @@
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.button1 {
+  background-color: transparent;
+  color: #b5ff00;
+  border: 2px solid #b5ff00;
+}
+
+.button1:hover {
+  background-color: #b5ff00;
+  color: black;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 10%;
+  height: 15px;
+  background: #000;
+  outline: none;
+  border: 2px solid #b5ff00;
+  border-radius: 4px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 60px;
+  background: #000;
+  cursor: pointer;
+  border: 2px solid #b5ff00;
+  border-radius: 4px;
+}
