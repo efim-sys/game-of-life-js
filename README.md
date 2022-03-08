@@ -1,2 +1,2 @@
 # game-of-life-js
-## [Play here](https://metaballs.cf/online "WebSite")
+## [Play here](https://efim-sys.github.io/game-of-life-js/ "WebSite")
