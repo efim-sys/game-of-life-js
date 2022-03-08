@@ -1,15 +1,75 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
+const speedSlider = document.getElementById("speedSlider");
 
-const resolution = 25;
+var useNet = true;
 
-const COLS = Math.floor(window.innerWidth / resolution);
-const ROWS = Math.floor(window.innerHeight / resolution) - 1;
+const rect = canvas.getBoundingClientRect();
+
+var speed = speedSlider.value;
+
+var resolution = 40;
+
+const glider = [
+  [0, 0, 1],
+  [1, 0, 1],
+  [0, 1, 1]
+];
+
+const glider_factory = [
+  [0, 0, 0, 0, 1, 1, 0, 0, 0],
+  [0, 0, 0, 0, 1, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 1, 1, 1, 0, 0],
+  [0, 0, 0, 1, 0, 0, 0, 1, 0],
+  [0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 1, 0, 0, 0],
+  [0, 0, 0, 1, 0, 0, 0, 1, 0],
+  [0, 0, 0, 0, 1, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 1, 0, 0, 0, 0],
+  [0, 0, 1, 1, 1, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 1, 0, 0, 0, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 0, 0, 0, 0, 0]
+];
+
+var COLS = Math.floor((window.innerWidth - rect.left) / resolution);
+var ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
 
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
-let grid = new Array(COLS).fill(null).map(() => new Array(ROWS).fill(0));
+let grid = new Array(310).fill(null).map(() => new Array(200).fill(0));
+
+function spawnObject(data) {
+  for(let i = 0; i < data.length; i++) {
+    for(let j = 0; j < data[i].length; j++){
+      grid[i][j] = data[i][j];
+    }
+  }
+}
 
 let pause = false;
 
@@ -22,7 +82,10 @@ function render() {
       const cell = grid[y][x];
 
       ctx.beginPath();
+      ctx.fillStyle = "#b5ff00";
       if(cell) ctx.fillRect(y * resolution, x * resolution, resolution, resolution);
+      if(useNet) ctx.strokeStyle = "#1a1a1a";
+      else ctx.strokeStyle = "black";
       ctx.rect(y * resolution, x * resolution, resolution, resolution);
       ctx.stroke();
     }
@@ -32,6 +95,7 @@ function render() {
 
 function play(grid) {
   const nextGrid = grid.map(arr => [...arr]);
+
   //if(grid[3][3]) console.log("3 3 is true");
   for(let x = 0; x < COLS; x++) {
     for(let y = 0; y < ROWS; y++) {
@@ -41,12 +105,13 @@ function play(grid) {
           if (i === 0 && j === 0) {
             continue;
           }
-          const x_cell = x + i;
-          const y_cell = y + j;
-
+          var x_cell = x + i;
+          var y_cell = y + j;
+          if(x_cell < 0) x_cell = COLS - 1;
+          if(x_cell >= COLS) x_cell = 0;
+          
           if (x_cell >= 0 && y_cell >= 0 && x_cell < COLS && y_cell < ROWS) {
-            const currentNeighbour = grid[x + i][y + j];
-            around += currentNeighbour;
+            around += grid[x_cell][y_cell];
           }
         }
       }
@@ -70,19 +135,41 @@ function playGame() {
   timerID = setInterval(function(){
     grid = play(grid);
     render();
-  }, 100);
+  }, 100 / speed);
 }
 
 function pauseGame() {
   clearInterval(timerID);
-  pause = true;
+}
+
+function clearGrid() {
+  grid.forEach(element => element.fill(0));
+  render();
+}
+function zoomIn() {
+  resolution += 1;
+  COLS = Math.floor((window.innerWidth - rect.left) / resolution);
+  ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
+  render();
+}
+
+function zoomOut() {
+  if (resolution >= 7) resolution -= 1;
+  COLS = Math.floor((window.innerWidth - rect.left) / resolution);
+  ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
+  render();
+}
+
+function changeSpeed() {
+  speed = speedSlider.value;
+  pauseGame();
+  playGame();
 }
 
 
-
-canvas.addEventListener("click", (e) => {
-  var gridX = Math.floor(e.clientX / resolution);
-  var gridY = Math.floor(e.clientY / resolution)-1;
+canvas.addEventListener("mousedown", (e) => {
+  var gridX = Math.floor((e.clientX - rect.left) / resolution);
+  var gridY = Math.floor((e.clientY - rect.top) / resolution);
   grid[gridX][gridY] = + !grid[gridX][gridY];
   render();
 });

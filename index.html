@@ -2,14 +2,21 @@
 <html>
 <head>
   <title>Game Of Life.JS</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <button onclick="playGame();">Play</button>
-  <button onclick="pauseGame();">Pause</button>
-  <input type="range" id="speed" name="speed"
-         min="0.1" max="1">
-  <br>
-  <canvas></canvas>
+<body style="background-color: black; -webkit-user-select: none;">
+  <div align="center">
+  <button class="button button1" onclick="playGame();">Play</button>
+  <button class="button button1" onclick="pauseGame();">Pause</button>
+  <button class="button button1" onclick="clearGrid();">Clear</button>
+  <input class="slider" onclick="changeSpeed();" type="range" id="speedSlider" name="speed"
+         min="0.1" max="5" value="1">
+  <button class="button button1" onclick="zoomIn();">+</button>
+  <button class="button button1" onclick="zoomOut();">-</button>
+</div><br>
+  <canvas></canvas><br>
+  <button class="button button1" onclick="spawnObject(glider); render();">Spawn glider</button>
+  <button class="button button1" onclick="spawnObject(glider_factory); render();">Spawn glider factory</button>
   <script src="main.js"></script>
 </body>
 </html>
