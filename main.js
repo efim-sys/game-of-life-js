@@ -108,8 +108,10 @@ function play(grid) {
           var y_cell = y + j;
           if(x_cell < 0) x_cell = COLS - 1;
           if(x_cell >= COLS) x_cell = 0;
+          /*
           if(y_cell < 1) y_cell = ROWS;
           if(y_cell >= ROWS) y_cell = 0;
+          */
           if (x_cell >= 0 && y_cell >= 0 && x_cell < COLS && y_cell < ROWS) {
             around += grid[x_cell][y_cell];
           }
