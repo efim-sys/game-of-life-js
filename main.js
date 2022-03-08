@@ -1,21 +1,19 @@
 const canvas = document.querySelector("canvas");
-const playButton = document.getElementById("playButton");
 const ctx = canvas.getContext("2d");
 
-const resolution = 40;
+const resolution = 25;
 
 const COLS = Math.floor(window.innerWidth / resolution);
 const ROWS = Math.floor(window.innerHeight / resolution) - 1;
-
 
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
 let grid = new Array(COLS).fill(null).map(() => new Array(ROWS).fill(0));
 
+let pause = false;
+
 render();
-
-
 
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -66,10 +64,21 @@ function play(grid) {
   return nextGrid;
 }
 
-playButton.addEventListener("click", function(){
-  grid = play(grid);
-  render();
-});
+let timerID;
+
+function playGame() {
+  timerID = setInterval(function(){
+    grid = play(grid);
+    render();
+  }, 100);
+}
+
+function pauseGame() {
+  clearInterval(timerID);
+  pause = true;
+}
+
+
 
 canvas.addEventListener("click", (e) => {
   var gridX = Math.floor(e.clientX / resolution);
