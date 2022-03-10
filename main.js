@@ -2,13 +2,15 @@ const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const speedSlider = document.getElementById("speedSlider");
 
-var useNet = true;
+let useNet = true;
 
 const rect = canvas.getBoundingClientRect();
 
-var speed = speedSlider.value;
+let speed = speedSlider.value;
+let mousedown = false;
+let swappedPixels = new Array();
 
-var resolution = 40;
+let resolution = 40;
 const glider = [
   [0, 0, 1],
   [1, 0, 1],
@@ -54,13 +56,14 @@ const glider_factory = [
   [0, 0, 1, 1, 0, 0, 0, 0, 0]
 ];
 
-var COLS = Math.floor((window.innerWidth - rect.left) / resolution);
-var ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
+let COLS = Math.floor((window.innerWidth - rect.left) / resolution);
+let ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
 
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
 let grid = new Array(310).fill(null).map(() => new Array(200).fill(0));
+
 
 function spawnObject(data) {
   for(let i = 0; i < data.length; i++) {
@@ -87,6 +90,7 @@ function render() {
       else ctx.strokeStyle = "black";
       ctx.rect(y * resolution, x * resolution, resolution, resolution);
       ctx.stroke();
+	  mouseEventGrid = grid;
     }
   }
 }
@@ -98,14 +102,14 @@ function play(grid) {
   //if(grid[3][3]) console.log("3 3 is true");
   for(let x = 0; x < COLS; x++) {
     for(let y = 0; y < ROWS; y++) {
-      var around = 0;
+      let around = 0;
       for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
           if (i === 0 && j === 0) {
             continue;
           }
-          var x_cell = x + i;
-          var y_cell = y + j;
+          let x_cell = x + i;
+          let y_cell = y + j;
           if(x_cell < 0) x_cell = COLS - 1;
           if(x_cell >= COLS) x_cell = 0;
           /*
@@ -134,9 +138,9 @@ function play(grid) {
 let timerID;
 
 function playGame() {
-  timerID = setInterval(function(){
+  timerID = setInterval(async function(){
     grid = play(grid);
-    render();
+    await render();
   }, 100 / speed);
 }
 
@@ -144,22 +148,22 @@ function pauseGame() {
   clearInterval(timerID);
 }
 
-function clearGrid() {
+async function clearGrid() {
   grid.forEach(element => element.fill(0));
-  render();
+  await render();
 }
-function zoomIn() {
+async function zoomIn() {
   resolution += 1;
   COLS = Math.floor((window.innerWidth - rect.left) / resolution);
   ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
-  render();
+  await render();
 }
 
-function zoomOut() {
+async function zoomOut() {
   if (resolution >= 7) resolution -= 1;
   COLS = Math.floor((window.innerWidth - rect.left) / resolution);
   ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
-  render();
+  await render();
 }
 
 function changeSpeed() {
@@ -167,11 +171,45 @@ function changeSpeed() {
   pauseGame();
   playGame();
 }
+async function randomiseGrid(){
+	for (let i = 0; i < grid.length; i+=1){
+		for (let j = 0; j < grid[i].length; j+=1){
+			grid[i][j] = Math.floor(Math.random() * 2);
+		}
+	}
+	await render()
+}
+async function swapPixels(x, y){
+		grid[x][y] = + !grid[x][y];
+}
 
-
-canvas.addEventListener("mousedown", (e) => {
-  var gridX = Math.floor((e.clientX - rect.left) / resolution);
-  var gridY = Math.floor((e.clientY - rect.top) / resolution);
-  grid[gridX][gridY] = + !grid[gridX][gridY];
-  render();
+canvas.addEventListener("mousedown", async (e) => {
+	mousedown = true;
+	let gridX = Math.floor((e.clientX - rect.left) / resolution);
+	let gridY = Math.floor((e.clientY - rect.top) / resolution);
+	let pix = gridX.toString() + " " + gridY.toString();
+	if(swappedPixels.indexOf(pix) === -1){
+		swappedPixels.push(pix);
+		await swapPixels(gridX, gridY);
+		await render();
+	}
+	
 });
+canvas.addEventListener("mouseup", async (e) =>{
+	mousedown = false;
+	swappedPixels = [];
+	await render();
+})
+canvas.addEventListener("mousemove", async (e) =>{
+	if(mousedown){
+		  let gridX = Math.floor((e.clientX - rect.left) / resolution);
+		  let gridY = Math.floor((e.clientY - rect.top) / resolution);
+		  let pix = gridX.toString() + " " + gridY.toString();
+		  if(swappedPixels.indexOf(pix) === -1){
+				swappedPixels.push(pix);
+				await swapPixels(gridX, gridY);
+				await render();
+			}
+	}
+})
+
