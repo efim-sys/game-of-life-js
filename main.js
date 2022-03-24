@@ -62,7 +62,7 @@ let ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
-let grid = new Array(155).fill(null).map(() => new Array(200).fill(0));
+let grid = new Array(250).fill(null).map(() => new Array(120).fill(0));
 
 
 function spawnObject(data) {
