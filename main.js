@@ -1,7 +1,8 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const speedSlider = document.getElementById("speedSlider");
-let gridData = document.getElementById("gridData")
+const gridData = document.getElementById("gridData")
+const changeGridButton = document.getElementById("changeGridButton")
 
 let useNet = true;
 
@@ -221,19 +222,23 @@ function getGridData(){
   let res = ""
 
   grid.forEach((g) =>{
-    res += + eval("0b" + g.join("")).toString(36).replace(/0000/g, "A").replace(/000/g, "B").replace(/00/g, "C") + "."
+    res += parseInt(g.join(""), 2).toString(36).replace(/0000/g, "A").replace(/000/g, "B").replace(/00/g, "C") + "."
   })
   
   return res
 }
 
 
-gridData.addEventListener("change", () => {
-  changeGrid(gridData.value)
-})
+async function gridButton() {
+  await changeGrid(gridData.value)
+  await render()
+}
 
 function changeGrid(value = ""){
-  value.split(".").forEach((v, i) =>{
-    grid[i] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString().padStart(gridW, "0").split('').map(Number)
+	value[-1] = ""
+  let vl = value.length
+  value.split(".").forEach((v, f) =>{
+		grid[f] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString(2).padStart(gridW, "0").split('').map(Number)
+		console.log(f)
   })
 }
