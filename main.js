@@ -62,7 +62,9 @@ let ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
 canvas.width = resolution * COLS;
 canvas.height = resolution * ROWS;
 
-let grid = new Array(250).fill(null).map(() => new Array(120).fill(0));
+let gridH = 250
+let gridW = 120
+let grid = new Array(gridH).fill(null).map(() => new Array(gridW).fill(0));
 
 
 function spawnObject(data) {
@@ -214,7 +216,22 @@ canvas.addEventListener("mousemove", async (e) =>{
 })
 
 function getGridData(){
-  let x = ""
-  grid.forEach((g, i) =>{x += i.toString() + eval("0b" + g.join("")).toString(36) + "\n"})
-  console.log(x)
+  let res = ""
+
+  grid.forEach((g) =>{
+    res += + eval("0b" + g.join("")).toString(36).replace(/0000/g, "A").replace(/000/g, "B").replace(/00/g, "C") + "."
+  })
+  
+  return res
+}
+
+let gridData = document.getElementById("gridData")
+gridData.addEventListener("change", () => {
+  grid = changeGrid(gridData.value)
+})
+
+function changeGrid(value = ""){
+  value.split(":").forEach((v, i) =>{
+    grid[i] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString().padStart(gridW, "0").split('').map(Number)
+  })
 }

@@ -3,21 +3,16 @@
 <head>
   <title>Game Of Life.JS</title>
   <link rel="stylesheet" href="style.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7159149477598216"
-     crossorigin="anonymous"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7159149477598216"
-     crossorigin="anonymous"></script>
   
 </head>
-<body style="background-color: black; -webkit-user-select: none;">
+<body style="background-color: black; -webkit-user-select: none; user-select: none;">
   <div align="center">
   <button class="button button1" onclick="playGame();">Play</button>
   <button class="button button1" onclick="pauseGame();">Pause</button>
   <button class="button button1" onclick="clearGrid();">Clear</button>
   <input class="slider" onclick="changeSpeed();" type="range" id="speedSlider" name="speed"
          min="0.1" max="5" value="1">
-   <input class="slider" type="text" name="speed"
-         min="0.1" max="5" value="1">
+   <input class="slider" type="text" name="gridData" id="gridData">
   <button class="button button1" onclick="zoomIn();">+</button>
   <button class="button button1" onclick="zoomOut();">-</button>
 </div><br>
