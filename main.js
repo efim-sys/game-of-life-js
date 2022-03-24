@@ -229,7 +229,7 @@ function getGridData(){
 
 
 gridData.addEventListener("change", () => {
-  grid = changeGrid(gridData.value)
+  changeGrid(gridData.value)
 })
 
 function changeGrid(value = ""){
