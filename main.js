@@ -1,6 +1,7 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const speedSlider = document.getElementById("speedSlider");
+let gridData = document.getElementById("gridData")
 
 let useNet = true;
 
@@ -95,6 +96,7 @@ function render() {
 	  mouseEventGrid = grid;
     }
   }
+  gridData.value = getGridData()
 }
 
 
@@ -225,7 +227,7 @@ function getGridData(){
   return res
 }
 
-let gridData = document.getElementById("gridData")
+
 gridData.addEventListener("change", () => {
   grid = changeGrid(gridData.value)
 })
