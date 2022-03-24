@@ -233,7 +233,7 @@ gridData.addEventListener("change", () => {
 })
 
 function changeGrid(value = ""){
-  value.split(".").forEach((v) =>{
+  value.split(".").forEach((v, i) =>{
     grid[i] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString().padStart(gridW, "0").split('').map(Number)
   })
 }
