@@ -238,7 +238,6 @@ function changeGrid(value = ""){
 	value[-1] = ""
   let vl = value.length
   value.split(".").forEach((v, f) =>{
-		grid[f] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString(2).padStart(gridW, "0").split('').map(Number)
-		console.log(f)
+		grid[f] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString(2).padStart(gridH, "0").split('').map(Number)
   })
 }
