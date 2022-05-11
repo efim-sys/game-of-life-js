@@ -1,8 +1,6 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const speedSlider = document.getElementById("speedSlider");
-const gridData = document.getElementById("gridData")
-const changeGridButton = document.getElementById("changeGridButton")
 
 let useNet = true;
 
@@ -97,7 +95,7 @@ function render() {
 	  mouseEventGrid = grid;
     }
   }
-  gridData.value = getGridData()
+
 }
 
 
@@ -218,26 +216,7 @@ canvas.addEventListener("mousemove", async (e) =>{
 	}
 })
 
-function getGridData(){
-  let res = ""
-
-  grid.forEach((g) =>{
-    res += parseInt(g.join(""), 2).toString(36).replace(/0000/g, "A").replace(/000/g, "B").replace(/00/g, "C") + "."
-  })
-  
-  return res
-}
 
 
-async function gridButton() {
-  await changeGrid(gridData.value)
-  await render()
-}
 
-function changeGrid(value = ""){
-	value[-1] = ""
-  let vl = value.length
-  value.split(".").forEach((v, f) =>{
-		grid[f] = parseInt(v.replace(/A/g, "0000").replace(/B/g, "000").replace(/C/g, "00"), 36).toString(2).padStart(gridH, "0").split('').map(Number)
-  })
-}
+
