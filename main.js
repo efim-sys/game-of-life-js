@@ -141,14 +141,20 @@ function play(grid) {
 let timerID;
 
 function playGame() {
-  timerID = setInterval(async function(){
-    grid = play(grid);
-    await render();
-  }, 100 / speed);
+  if(!isStarted) {
+    isStarted = true
+    timerID = setInterval(async function(){
+      grid = play(grid);
+      await render();
+    }, 100 / speed);
+  }
 }
 
 function pauseGame() {
-  clearInterval(timerID);
+  if(isStartes) {
+    clearInterval(timerID);
+    isStarted =false
+  }
 }
 
 async function clearGrid() {
