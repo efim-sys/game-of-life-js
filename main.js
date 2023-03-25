@@ -10,6 +10,8 @@ let speed = speedSlider.value;
 let mousedown = false;
 let swappedPixels = new Array();
 
+let isStarted = false;
+
 let resolution = 40;
 const glider = [
   [0, 0, 1],
@@ -151,9 +153,9 @@ function playGame() {
 }
 
 function pauseGame() {
-  if(isStartes) {
+  if(isStarted) {
     clearInterval(timerID);
-    isStarted =false
+    isStarted = false;
   }
 }
 
