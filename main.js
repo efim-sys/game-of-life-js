@@ -58,6 +58,27 @@ const glider_factory = [
   [0, 0, 1, 1, 0, 0, 0, 0, 0]
 ];
 
+
+async function utob(uint8Array) {
+  const cs = new CompressionStream('gzip');
+  const writer = cs.writable.getWriter();
+  writer.write(uint8Array);
+  writer.close();
+  const compressedArray = await new Response(cs.readable).arrayBuffer();
+  return btoa(String.fromCharCode.apply(null, new Uint8Array(compressedArray)));
+}
+
+async function btou(base64) {
+  const compressedArray = new Uint8Array(atob(base64).split('').map(char => char.charCodeAt(0)));
+  const ds = new DecompressionStream('gzip');
+  const writer = ds.writable.getWriter();
+  writer.write(compressedArray);
+  writer.close();
+  const decompressedArray = await new Response(ds.readable).arrayBuffer();
+  return new Uint8Array(decompressedArray);
+}
+
+
 let COLS = Math.floor((window.innerWidth - rect.left) / resolution);
 let ROWS = Math.floor((window.innerHeight - rect.top) / resolution)-1;
 
@@ -66,13 +87,55 @@ canvas.height = resolution * ROWS;
 
 let gridH = 250
 let gridW = 120
-let grid = new Array(gridH).fill(null).map(() => new Array(gridW).fill(0));
+let gridBuffer = new Uint8Array(Math.floor((gridH * gridW + 7) >>> 3));
+
+class Grid {
+  constructor(buffer) {
+    this.length = gridH;
+    this.buffer = buffer;
+  }
+  get(x, y) {
+    const idx = x * gridH + y;
+    return + ((this.buffer[idx >>> 3] & (1 << (idx & 7))) !== 0);
+  }
+  set(x, y, value) {
+    const idx = x * gridH + y;
+    if (value) {
+      this.buffer[idx >>> 3] |= 1 << (idx & 7);
+    } else {
+      this.buffer[idx >>> 3] &= ~(1 << (idx & 7));
+    }
+  }
+  map(callback) {
+    const result = [];
+    for (let i = 0; i < gridW; i++) {
+      result[i] = [];
+      for (let j = 0; j < gridH; j++) {
+        result[i][j] = callback(this.get(i, j), i, j, this);
+      }
+    }
+    return result;
+  }
+  clone() {
+    return new Grid(this.buffer.slice())
+  }
+  forEach(callback) {
+    for (let i = 0; i < gridW; i++) {
+      for (let j = 0; j < gridH; j++) {
+        callback(this.get(i, j), i, j, this);
+      }
+    }
+  }
+  length
+};
+let grid = new Grid(gridBuffer);
+// let grid = new Array(gridH).fill(null).map(() => new Uint8Array(gridW).fill(0));
 
 
 function spawnObject(data) {
   for(let i = 0; i < data.length; i++) {
     for(let j = 0; j < data[i].length; j++){
-      grid[i][j] = data[i][j];
+      grid.set(i, j, data[i][j]);
     }
   }
 }
@@ -85,7 +148,7 @@ function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for(let y = 0; y < COLS; y++) {
     for(let x = 0; x < ROWS; x++) {
-      const cell = grid[y][x];
+      const cell = grid.get(y, x);
 
       ctx.beginPath();
       ctx.fillStyle = "#b5ff00";
@@ -100,11 +163,22 @@ function render() {
 
 }
 
+async function gridButton() {
+  if(!pause) {
+    pause = true;
+    if(isStarted) {
+      clearInterval(timerID);
+      isStarted = false;
+    }
+  }
+  let s = document.getElementById("gridData").value;
+  grid = new Grid(await btou(s));
+  await render();
+} 
 
-function play(grid) {
-  const nextGrid = grid.map(arr => [...arr]);
+function play(nextGrid) {
+  var grid = nextGrid.clone();
 
-  //if(grid[3][3]) console.log("3 3 is true");
   for(let x = 0; x < COLS; x++) {
     for(let y = 0; y < ROWS; y++) {
       let around = 0;
@@ -122,22 +196,21 @@ function play(grid) {
           if(y_cell >= ROWS) y_cell = 0;
           */
           if (x_cell >= 0 && y_cell >= 0 && x_cell < COLS && y_cell < ROWS) {
-            around += grid[x_cell][y_cell];
+            around += grid.get(x_cell, y_cell);
           }
         }
       }
 
-      if (grid[x][y] === 1 && around < 2) {
-        nextGrid[x][y] = 0;
-      } else if (grid[x][y] === 1 && around > 3) {
-        nextGrid[x][y] = 0;
-      } else if (grid[x][y] === 0 && around === 3) {
-        nextGrid[x][y] = 1;
+      if (grid.get(x, y) === 1 && around < 2) {
+        nextGrid.set(x, y, 0);
+      } else if (grid.get(x, y) === 1 && around > 3) {
+        nextGrid.set(x, y, 0);
+      } else if (grid.get(x, y) === 0 && around === 3) {
+        nextGrid.set(x, y, 1);
       }
 
     }
   }
-  return nextGrid;
 }
 
 let timerID;
@@ -146,7 +219,7 @@ function playGame() {
   if(!isStarted) {
     isStarted = true
     timerID = setInterval(async function(){
-      grid = play(grid);
+      play(grid);
       await render();
     }, 100 / speed);
   }
@@ -157,10 +230,11 @@ function pauseGame() {
     clearInterval(timerID);
     isStarted = false;
   }
+  utob(grid.buffer).then(s => document.getElementById("gridData").value = s);
 }
 
 async function clearGrid() {
-  grid.forEach(element => element.fill(0));
+  grid = new Grid(new Uint8Array(Math.floor((gridH * gridW + 7) >>> 3)));
   await render();
 }
 async function zoomIn() {
@@ -183,15 +257,11 @@ function changeSpeed() {
   playGame();
 }
 async function randomiseGrid(){
-	for (let i = 0; i < grid.length; i+=1){
-		for (let j = 0; j < grid[i].length; j+=1){
-			grid[i][j] = Math.floor(Math.random() * 2);
-		}
-	}
+	crypto.getRandomValues(grid.buffer)
 	await render()
 }
 async function swapPixels(x, y){
-		grid[x][y] = + !grid[x][y];
+		grid.set(x, y, + !grid.get(x, y));
 }
 
 canvas.addEventListener("mousedown", async (e) => {
@@ -223,8 +293,4 @@ canvas.addEventListener("mousemove", async (e) =>{
 			}
 	}
 })
-
-
-
-
 
